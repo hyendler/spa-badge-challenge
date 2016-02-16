@@ -5,3 +5,16 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+
+require 'faker'
+
+10.times do
+  Student.create(name: Faker::Name.name)
+end
+
+20.times do
+  Badge.create(text: Faker::Company.catch_phrase,
+                points: 0,
+                student_id: rand(1...10))
+end
