@@ -2,7 +2,6 @@ class BadgesController < ApplicationController
   before_action :set_badge, only: [:show, :update, :destroy]
 
   def index
-    @badges =
   end
 
   def show

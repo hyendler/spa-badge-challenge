@@ -1,72 +1,92 @@
-var SweetSelector = (function(){
-  return {
-    select: function(element){
-      // check if it has a hash, period, or nothing in front it private method
-      if(element.includes('#')){
-        var str = element.slice(1,element.length)
-        return document.getElementById(str);
+var miniQuery = (function(){
+
+  var SweetSelector = (function(){
+    return {
+      select: function(element){
+        // check if it has a hash, period, or nothing in front it private method
+        if(element.includes('#')){
+          var str = element.slice(1,element.length)
+          return document.getElementById(str);
+        }
+        else if(element.includes('.')){
+          var str = element.slice(1,element.length)
+          return document.getElementsByClassName(str)[0];
+        }
+        else{
+          return document.getElementsByTagName(element)[0];
+        }
+      },
+      html: function(element){
+          var selectedElement = SweetSelector.select(element);
+          return selectedElement.innerHTML;
+        }
+    };
+  })();
+
+  var DOM = (function(){
+    return {
+      hide: function(element){
+        return SweetSelector.select(element).style.display = 'none';
+      },
+      show: function(element){
+        return SweetSelector.select(element).style.removeProperty("display");
+      },
+      addClass: function(element, className){
+        return SweetSelector.select(element).className += ' ' + className;
+      },
+      removeClass: function(element, className){
+        return SweetSelector.select(element).classList.remove(className);
       }
-      else if(element.includes('.')){
-        var str2 = element.slice(1,element.length)
-        return document.getElementsByClassName(str2)[0];
-      }
-      else{
-        return document.getElementsByTagName(element)[0];
+      // append: function(element, className){
+
+      // }
+    }
+  })();
+
+
+  var EventDispatcher = (function(){
+    return {
+      on: function(target, event, func){
+        SweetSelector.select(target).addEventListener(event, func);
+      },
+      trigger: function(target, event){
+        var newEvent = new Event(event);
+        SweetSelector.select(target).dispatchEvent(newEvent);
       }
     }
-  };
-})();
+  })();
 
-var DOM = (function(){
-  return {
-    hide: function(element){
-      return SweetSelector.select(element).style.display = 'none';
-    },
-    show: function(element){
-      return SweetSelector.select(element).style.removeProperty("display");
-    },
-    addClass: function(element, className){
-      return SweetSelector.select(element).className += ' ' + className;
-    },
-    removeClass: function(element, className){
-      return SweetSelector.select(element).classList.remove(className);
-    }
-  }
-})();
+  var AjaxWrapper = (function(){
+    return {
+      request: function(hash){
+        url = hash["url"];
+        type = hash["type"];
 
-
-var EventDispatcher = (function(){
-  return {
-    on: function(target, event, func){
-      SweetSelector.select(target).addEventListener(event, func);
-    },
-    trigger: function(target, event){
-      var newEvent = new Event(event);
-      SweetSelector.select(target).dispatchEvent(newEvent);
-    }
-  }
-})();
-
-var AjaxWrapper = (function(){
-  return {
-    request: function(hash){
-      url = hash["url"];
-      type = hash["type"];
-
-      var promise = new Promise(function(resolve, reject){
+        var promise = new Promise(function(resolve, error){
         var newRequest = new XMLHttpRequest();
 
-      newRequest.open(type, url, true);
-      newRequest.send(null);
-      newRequest.onreadystatechange = function(){
-        if(newRequest.readyState == 4){
-          resolve(this.response);
-        } else {
-          reject(this.statusText);
-        }
-      };
-    })
-      return promise;
-    },
+        newRequest.open(type, url, true);
+        newRequest.send();
+        // newRequest.onreadystatechange = function(){
+        //   if(newRequest.readyState == 4){
+        newRequest.onload = function() {
+          if(this.status >= 200 && this.status < 300){
+            resolve(this.response);
+          } else {
+            error(this.statusText);
+          }
+        };
+      })
+        return promise;
+      },
+    }
+  })();
+
+  return {
+    SweetSelector: SweetSelector,
+    DOM: DOM,
+    EventDispatcher: EventDispatcher,
+    AjaxWrapper: AjaxWrapper
   }
+
 })();
